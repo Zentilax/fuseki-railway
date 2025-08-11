@@ -1,5 +1,9 @@
+@prefix :       <#> .
 @prefix fuseki: <http://jena.apache.org/fuseki#> .
 @prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
 
 [] rdf:type fuseki:Server ;
    fuseki:services (
