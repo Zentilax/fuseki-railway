@@ -24,8 +24,6 @@ WORKDIR ${FUSEKI_HOME}
 # Expose Fuseki's port
 EXPOSE 3030
 
-# Create data folder for persistence
-VOLUME ["/data"]
 
 # Start Fuseki with the config file
 CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar", "--config=config.ttl"]
