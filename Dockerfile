@@ -16,7 +16,7 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
     rm fuseki.zip
 
 # Copy Fuseki config
-COPY config.ttl ${FUSEKI_HOME}/config.ttl
+# COPY config.ttl ${FUSEKI_HOME}/config.ttl
 
 # Set working directory
 WORKDIR ${FUSEKI_HOME}
@@ -26,4 +26,4 @@ EXPOSE 3030
 
 
 # Start Fuseki with the config file
-CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar", "--config=config.ttl"]
+#CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar"]
