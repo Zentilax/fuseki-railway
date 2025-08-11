@@ -15,7 +15,7 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
 
 WORKDIR ${FUSEKI_HOME}
 COPY config.ttl ${FUSEKI_HOME}/config.ttl
-COPY shiro.ini /fuseki/run/shiro.ini
+COPY shiro.ini ${FUSEKI_HOME}/shiro.ini
 
 EXPOSE 3030
 
