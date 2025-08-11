@@ -26,4 +26,4 @@ EXPOSE 3030
 
 
 # Start Fuseki with the config file
-#CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar"]
+CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar"]
