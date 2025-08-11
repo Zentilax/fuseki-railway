@@ -1,22 +1,20 @@
-@prefix :       <#> .
-@prefix fuseki: <http://jena.apache.org/fuseki#> .
-@prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
-@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix :        <#> .
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tdb2:    <http://jena.apache.org/2016/tdb#> .
 
 [] rdf:type fuseki:Server ;
    fuseki:services (
-     <#service1>
+     <#service_german_food>
    ) .
 
-<#service1> rdf:type fuseki:Service ;
-   fuseki:name "ds" ;          # dataset endpoint name
-   fuseki:dataset <#dataset1> ;
-   fuseki:serviceQuery "sparql" ;
-   fuseki:serviceUpdate "update" ;
-   fuseki:serviceUpload "upload" ;
-   fuseki:serviceReadWriteGraphStore "data" .
+<#service_german_food> rdf:type fuseki:Service ;
+    fuseki:name "german-food" ;
+    fuseki:serviceQuery "query" ;
+    fuseki:serviceUpdate "update" ;
+    fuseki:serviceReadWriteGraphStore "data" ;
+    fuseki:dataset <#tdb_dataset_german_food> .
 
-<#dataset1> rdf:type tdb2:DatasetTDB2 ;
-    tdb2:location "/data" .   # persistent dataset directory inside container
+<#tdb_dataset_german_food> rdf:type tdb2:DatasetTDB2 ;
+    tdb2:location "german-food" ;
+    tdb2:unionDefaultGraph true .
