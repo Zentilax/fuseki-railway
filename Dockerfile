@@ -14,6 +14,7 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
     rm fuseki.zip
 
 WORKDIR ${FUSEKI_HOME}
+COPY config.ttl ${FUSEKI_HOME}/config.ttl
 
 EXPOSE 3030
 
