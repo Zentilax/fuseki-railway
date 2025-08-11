@@ -17,4 +17,6 @@ WORKDIR ${FUSEKI_HOME}
 
 EXPOSE 3030
 
-CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-jar", "fuseki-server.jar"]
+#CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-jar", "fuseki-server.jar"]
+CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-jar", "fuseki-server.jar", "--config=config.ttl"]
+
