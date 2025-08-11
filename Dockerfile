@@ -15,15 +15,11 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
     mv apache-jena-fuseki-${FUSEKI_VERSION} ${FUSEKI_HOME} && \
     rm fuseki.zip
 
-# Copy Fuseki config
-# COPY config.ttl ${FUSEKI_HOME}/config.ttl
-
 # Set working directory
 WORKDIR ${FUSEKI_HOME}
 
 # Expose Fuseki's port
 EXPOSE 3030
 
-
-# Start Fuseki with the config file
-CMD ["java", "-Xmx1G", "-jar", "fuseki-server.jar"]
+# Start Fuseki with JVM flag to disable container support and set max memory
+CMD ["java", "-Xmx1G", "-XX:+UseContainerSupport=false", "-jar", "fuseki-server.jar"]
