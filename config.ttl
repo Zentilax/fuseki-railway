@@ -4,11 +4,11 @@
 @prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
 
 <#service1> rdf:type fuseki:Service ;
-    fuseki:name                       "ds" ;         # dataset name in URL
-    fuseki:serviceQuery               "sparql" ;     # SPARQL query endpoint
-    fuseki:serviceUpdate              "update" ;     # SPARQL update endpoint
-    fuseki:serviceUpload              "upload" ;     # file upload endpoint
-    fuseki:serviceReadWriteGraphStore "data" ;       # Graph Store Protocol
+    fuseki:name                       "ds" ;
+    fuseki:serviceQuery               "sparql" ;
+    fuseki:serviceUpdate              "update" ;
+    fuseki:serviceUpload              "upload" ;
+    fuseki:serviceReadWriteGraphStore "data" ;
     fuseki:dataset                    <#dataset> .
 
 <#dataset> rdf:type ja:DatasetTDB2 ;
