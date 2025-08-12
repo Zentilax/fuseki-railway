@@ -1,9 +1,8 @@
-# Use Java 17 slim image
-FROM openjdk:17-jdk-slim
+# Use Java 11 instead - better Railway compatibility
+FROM openjdk:11-jre-slim
 
 ENV FUSEKI_VERSION=5.5.0
 ENV FUSEKI_HOME=/fuseki
-ENV DATASET_NAME=ds
 ENV DATA_PATH=/data
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
@@ -17,12 +16,11 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
 WORKDIR ${FUSEKI_HOME}
 
 COPY config.ttl ${FUSEKI_HOME}/config.ttl
-# Don't copy shiro.ini - run without authentication
 
 # Create the data directory
-RUN mkdir -p /data
+RUN mkdir -p /data && chmod 777 /data
 
 EXPOSE 3030
 
-# Run without authentication and disable problematic JVM features for Railway
-CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djava.awt.headless=true", "-Dfile.encoding=UTF-8", "-Djetty.host=0.0.0.0", "-Dio.micrometer.core.instrument.binder.system.FileDescriptorMetrics.enabled=false", "-jar", "fuseki-server.jar", "--config=config.ttl"]
+# Simple command without container detection issues
+CMD ["java", "-Xmx1G", "-Djava.awt.headless=true", "-Djetty.host=0.0.0.0", "-jar", "fuseki-server.jar", "--config=config.ttl"]
