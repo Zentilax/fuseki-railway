@@ -7,6 +7,7 @@ ENV DATASET_NAME=ds
 ENV DATA_PATH=/data
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+
 RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.zip \
     -o fuseki.zip && \
     unzip fuseki.zip && \
@@ -14,11 +15,11 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
     rm fuseki.zip
 
 WORKDIR ${FUSEKI_HOME}
+
 COPY config.ttl ${FUSEKI_HOME}/config.ttl
-COPY shiro.ini ${FUSEKI_HOME}/shiro.ini
+# Don't copy shiro.ini - run without authentication
 
 EXPOSE 3030
 
-#CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-jar", "fuseki-server.jar"]
-CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-jar", "fuseki-server.jar", "--config=config.ttl"]
-
+# Run without authentication
+CMD ["java", "-Xmx1G", "-XX:+UseContainerSupport", "-Djava.awt.headless=true", "-Dfile.encoding=UTF-8", "-Djetty.host=0.0.0.0", "-jar", "fuseki-server.jar", "--config=config.ttl"]
