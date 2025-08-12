@@ -10,7 +10,6 @@
    ) .
 
 # ==== SERVICE DEFINITION =================================================
-
 <#service_german_food> rdf:type fuseki:Service ;
     fuseki:name "german-food" ;
     fuseki:serviceQuery "query" ;
@@ -19,17 +18,19 @@
     fuseki:dataset <#inferred_dataset> .
 
 # ==== INFERENCE MODEL ====================================================
-
 <#inferred_dataset> rdf:type ja:InfModel ;
-    # Point to the database to use
-    ja:baseModel <#tdb_dataset_german_food> ;
+    # Point to the base model (not dataset) to use
+    ja:baseModel <#tdb_model_german_food> ;
     # Define the reasoner in a nested block
     ja:reasoner [
         ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>
     ] .
 
-# ==== DATABASE DEFINITION ===============================================
+# ==== TDB2 MODEL DEFINITION ==============================================
+<#tdb_model_german_food> rdf:type tdb2:GraphTDB2 ;
+    tdb2:dataset <#tdb_dataset_german_food> .
 
+# ==== DATABASE DEFINITION ===============================================
 <#tdb_dataset_german_food> rdf:type tdb2:DatasetTDB2 ;
     tdb2:location "german-food" ;
     tdb2:unionDefaultGraph true .
