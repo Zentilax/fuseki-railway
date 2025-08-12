@@ -19,7 +19,10 @@ WORKDIR ${FUSEKI_HOME}
 COPY config.ttl ${FUSEKI_HOME}/config.ttl
 # Don't copy shiro.ini - run without authentication
 
+# Create the data directory
+RUN mkdir -p /data
+
 EXPOSE 3030
 
-# Run without authentication
-CMD ["java", "-Xmx1G", "-XX:+UseContainerSupport", "-Djava.awt.headless=true", "-Dfile.encoding=UTF-8", "-Djetty.host=0.0.0.0", "-jar", "fuseki-server.jar", "--config=config.ttl"]
+# Run without authentication and disable problematic JVM features for Railway
+CMD ["java", "-Xmx1G", "-XX:-UseContainerSupport", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djava.awt.headless=true", "-Dfile.encoding=UTF-8", "-Djetty.host=0.0.0.0", "-Dio.micrometer.core.instrument.binder.system.FileDescriptorMetrics.enabled=false", "-jar", "fuseki-server.jar", "--config=config.ttl"]
