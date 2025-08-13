@@ -22,7 +22,16 @@ java \
 
 # Wait for Fuseki to start
 echo "⏳ Waiting for Fuseki to start..."
-sleep 15
+for i in {1..10}; do
+    if curl -s http://localhost:3031/\$/ping >/dev/null; then
+        echo "✅ Fuseki is up!"
+        break
+    else
+        echo "⏳ Waiting for Fuseki to be ready... attempt $i"
+        sleep 3
+    fi
+done
+
 
 # Test Fuseki connection
 echo "🔍 Testing Fuseki connection..."
