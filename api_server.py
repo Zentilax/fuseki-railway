@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import os
 import sys
 from functools import wraps
+from flask_cors import CORS
 
 # Add the app directory to Python path
 sys.path.append('/app')
@@ -10,7 +11,7 @@ from query_system import QueryHistoryVectorDB, load_ontology_prompt, generate_sp
 from config import FAISS_VOLUME_PATH, API_HOST, API_PORT, INTERNAL_FUSEKI_PORT
 
 app = Flask(__name__)
-
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 def require_api_key(f):
