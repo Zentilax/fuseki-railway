@@ -9,13 +9,11 @@ payload = {
 }
 
 headers = {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "x-api-key": ""  # <-- your secret API key
 }
 
 response = requests.post(url, json=payload, headers=headers)
 
 print(response.status_code)
 print(response.text)
-
-
-
