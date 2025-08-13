@@ -44,7 +44,14 @@
         fuseki:operation fuseki:gsp-r ; 
         fuseki:name "data" 
     ] ;
-    fuseki:dataset <#dataset_inference> .
+    fuseki:dataset <#dataset_inference> ;
+    jetty:filters (
+        [ rdf:type jetty:CorsFilter ;
+          jetty:allowedOrigins "*" ;
+          jetty:allowedMethods "GET, POST, OPTIONS" ;
+          jetty:allowedHeaders "*" ;
+        ]
+    ) .
 
 # ==== RAW DATASET (TDB2) =============================================
 <#dataset_raw> rdf:type tdb2:DatasetTDB2 ;
