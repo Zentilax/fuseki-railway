@@ -1,13 +1,23 @@
-# Use Java 17 slim image
+# Use Java 17 slim image (matching your current setup)
 FROM openjdk:17-jdk-slim
 
+# Environment variables (matching your current setup)
 ENV FUSEKI_VERSION=5.5.0
 ENV FUSEKI_HOME=/fuseki
 ENV DATASET_NAME=ds
 ENV DATA_PATH=/data
 
-RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+# Install Python and system packages for FAISS
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    curl \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
+# Install Fuseki (matching your current setup)
 RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.zip \
     -o fuseki.zip && \
     unzip fuseki.zip && \
@@ -16,26 +26,23 @@ RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSE
 
 WORKDIR ${FUSEKI_HOME}
 
+# Copy your existing config
 COPY config.ttl ${FUSEKI_HOME}/config.ttl
 
-# Create the data directory and ensure proper permissions
+# Copy Python requirements and install dependencies
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
+
+# Copy your Python scripts
+COPY . /app/
+
+# Create the data directory and ensure proper permissions (matching your setup)
 RUN mkdir -p /data && chmod 777 /data
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3030
 
-# Disable ALL metrics and container detection for Railway
-CMD ["java", \
-    "-Xmx1G", \
-    "-XX:-UseContainerSupport", \
-    "-Djava.awt.headless=true", \
-    "-Dfile.encoding=UTF-8", \
-    "-Djetty.host=0.0.0.0", \
-    "-Dfuseki.metrics.enabled=false", \
-    "-Dfuseki.prometheus.enabled=false", \
-    "-Dmicrometer.enabled=false", \
-    "-Dio.micrometer.core.instrument.binder.system.FileDescriptorMetrics.enabled=false", \
-    "-Dio.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics.enabled=false", \
-    "-Dio.micrometer.core.instrument.binder.system.ProcessorMetrics.enabled=false", \
-    "-Dmanagement.metrics.enabled=false", \
-    "-jar", "fuseki-server.jar", \
-    "--config=config.ttl"]
+ENTRYPOINT ["/entrypoint.sh"]
