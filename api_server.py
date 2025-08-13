@@ -57,33 +57,40 @@ def process_query():
     try:
         data = request.get_json()
         question = data.get('question')
-        
+
         if not question:
             return jsonify({"error": "Question is required"}), 400
-        
+
         # Check for similar queries first
         similar_query = vector_db.search_similar_queries(question)
-        
+
         response = {
             "question": question,
             "from_cache": False,
             "similar_query": None
         }
-        
+
+        # Prepare the prompt for SPARQL generation
+        prompt_context = ontology_prompt
+
         if similar_query and not data.get('force_new_query', False):
-            response.update({
-                "from_cache": True,
-                "similar_query": {
-                    "question": similar_query['question'],
-                    "timestamp": similar_query['timestamp']
-                },
-                "answer": similar_query['formatted_answer'],
-                "sparql_query": similar_query['sparql_query']
-            })
-            return jsonify(response)
+            # Add similar query and its SPARQL to the prompt context to help generate a refined query
+            prompt_context += (
+                "\n\n# Note: A similar question was asked previously.\n"
+                f"Similar question: {similar_query['question']}\n"
+                f"Similar SPARQL query: {similar_query['sparql_query']}\n"
+                "Please generate a SPARQL query that answers the current question distinctly."
+            )
+            # Also include similar query info in the response as suggestion
+            response['similar_query'] = {
+                "question": similar_query['question'],
+                "timestamp": similar_query['timestamp'],
+                "sparql_query": similar_query['sparql_query'],
+                "answer_preview": similar_query['formatted_answer'][:200]  # partial preview
+            }
         
         # Generate new query
-        sparql_query = generate_sparql_query(question, ontology_prompt)
+        sparql_query = generate_sparql_query(question, prompt_context)
         
         if sparql_query.startswith("⚠️"):
             return jsonify({"error": sparql_query}), 400
@@ -92,12 +99,21 @@ def process_query():
         results = query_fuseki(sparql_query)
         raw_formatted = format_results_raw(results)
         formatted_results = format_results_with_llm(raw_formatted, question)
-        
-        # Add to history
-        vector_db.add_query_to_history(question, sparql_query, results, formatted_results)
-        
+
+        # 4. Check rules before adding to history
+        if results:  # Rule 1: only add if query returned results
+            similar_query = vector_db.search_similar_queries(question)
+            
+            if not similar_query:  # Rule 2: no similar query already in DB
+                vector_db.add_query_to_history(question, sparql_query, results, formatted_results)
+                print("💾 Query added to FAISS history")
+            else:
+                print("⚠️ Similar query already exists, not adding to history")
+        else:
+            print("⚠️ Query returned no results, not adding to history")
+
+        # 5. Return response regardless
         response.update({
-            "lastbit of prmpt" : ontology_prompt[100:150],
             "answer": formatted_results,
             "sparql_query": sparql_query,
             "raw_results_count": len(results)
