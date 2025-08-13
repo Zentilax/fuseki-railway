@@ -17,7 +17,8 @@ java \
     -Dmanagement.metrics.enabled=false \
     -jar fuseki-server.jar \
     --port=3031 \
-    --config=config.ttl &
+    --config=config.ttl \
+    --cors &
 
 # Wait for Fuseki to start
 echo "⏳ Waiting for Fuseki to start..."
