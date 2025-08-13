@@ -10,11 +10,24 @@ from config import FAISS_VOLUME_PATH, API_HOST, API_PORT, INTERNAL_FUSEKI_PORT
 
 app = Flask(__name__)
 
+
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        key = request.headers.get('x-api-key')
+        if not key or key != os.getenv('API_KEY'):
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
 # Initialize the vector database with your existing volume path
 vector_db = QueryHistoryVectorDB(volume_path='/data')
 ontology_prompt = load_ontology_prompt()
 
 @app.route('/', methods=['GET'])
+@require_api_key
 def home():
     return jsonify({
         "message": "German Cuisine Query API with FAISS Vector Search",
@@ -28,6 +41,7 @@ def home():
     })
 
 @app.route('/health', methods=['GET'])
+@require_api_key
 def health_check():
     from config import FUSEKI_ENDPOINT
     
@@ -53,6 +67,7 @@ def health_check():
     })
 
 @app.route('/query', methods=['POST'])
+@require_api_key
 def process_query():
     try:
         data = request.get_json()
@@ -125,6 +140,7 @@ def process_query():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/history', methods=['GET'])
+@require_api_key
 def get_history():
     """Get query history"""
     try:
@@ -146,6 +162,7 @@ def get_history():
 
 # Proxy routes to maintain compatibility with existing Fuseki endpoints
 @app.route('/german-food-inferred/<path:path>', methods=['GET', 'POST'])
+@require_api_key
 def fuseki_inferred_proxy(path):
     """Direct proxy to your inference endpoint"""
     import requests
@@ -163,6 +180,7 @@ def fuseki_inferred_proxy(path):
     return resp.content, resp.status_code, dict(resp.headers)
 
 @app.route('/german-food/<path:path>', methods=['GET', 'POST'])
+@require_api_key
 def fuseki_raw_proxy(path):
     """Proxy to raw data service"""
     import requests
@@ -180,6 +198,7 @@ def fuseki_raw_proxy(path):
     return resp.content, resp.status_code, dict(resp.headers)
 
 @app.route('/clear-history', methods=['POST'])
+@require_api_key
 def clear_history():
     """Clear query history (use with caution)"""
     try:
