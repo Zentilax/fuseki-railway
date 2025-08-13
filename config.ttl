@@ -22,7 +22,14 @@
         fuseki:operation fuseki:gsp-rw ; 
         fuseki:name "data" 
     ] ;
-    fuseki:dataset <#dataset_raw> .
+    fuseki:dataset <#dataset_raw> ;
+    jetty:filters (
+        [ rdf:type jetty:CorsFilter ;
+          jetty:allowedOrigins "*" ;
+          jetty:allowedMethods "GET, POST, OPTIONS, PUT, DELETE" ;
+          jetty:allowedHeaders "*" ;
+        ]
+    ) .
 
 # ==== INFERENCE SERVICE (read-only with reasoning) ===================
 <#service_inference> rdf:type fuseki:Service ;
