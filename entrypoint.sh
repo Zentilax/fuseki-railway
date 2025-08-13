@@ -8,8 +8,6 @@ java \
     -XX:-UseContainerSupport \
     -Djava.awt.headless=true \
     -Dfile.encoding=UTF-8 \
-    -Djetty.host=127.0.0.1 \
-    -Djetty.port=3031 \
     -Dfuseki.metrics.enabled=false \
     -Dfuseki.prometheus.enabled=false \
     -Dmicrometer.enabled=false \
@@ -18,6 +16,7 @@ java \
     -Dio.micrometer.core.instrument.binder.system.ProcessorMetrics.enabled=false \
     -Dmanagement.metrics.enabled=false \
     -jar fuseki-server.jar \
+    --port=3031 \
     --config=config.ttl &
 
 # Wait for Fuseki to start
