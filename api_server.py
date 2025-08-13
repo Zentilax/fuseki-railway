@@ -97,6 +97,7 @@ def process_query():
         vector_db.add_query_to_history(question, sparql_query, results, formatted_results)
         
         response.update({
+            "lastbit of prmpt" : ontology_prompt[100:150],
             "answer": formatted_results,
             "sparql_query": sparql_query,
             "raw_results_count": len(results)
