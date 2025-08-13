@@ -43,6 +43,9 @@ RUN mkdir -p /data && chmod 777 /data
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3030
+#fuseki
+ 
+#flask api 
+EXPOSE 5000   
 
 ENTRYPOINT ["/entrypoint.sh"]

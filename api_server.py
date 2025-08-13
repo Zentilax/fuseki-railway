@@ -48,7 +48,7 @@ def health_check():
         "openai_configured": bool(os.getenv('OPENAI_API_KEY')),
         "ports": {
             "fuseki_internal": INTERNAL_FUSEKI_PORT,
-            "api_public": "3030"
+            "api_public": "5000"
         }
     })
 

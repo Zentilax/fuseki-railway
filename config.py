@@ -18,6 +18,6 @@ FUSEKI_ENDPOINT = f"http://localhost:{INTERNAL_FUSEKI_PORT}/german-food-inferred
 FAISS_SIMILARITY_THRESHOLD = float(os.getenv('FAISS_SIMILARITY_THRESHOLD', '0.8'))
 FAISS_VOLUME_PATH = os.getenv('FAISS_VOLUME_PATH', '/app/data')
 
-# Flask API Configuration - Run on port 3030 to match Railway expectation
+# Flask API Configuration 
 API_HOST = os.getenv('API_HOST', '0.0.0.0')
-API_PORT = int(os.getenv('API_PORT', '3030'))
+API_PORT = int(os.getenv('API_PORT', '5000'))

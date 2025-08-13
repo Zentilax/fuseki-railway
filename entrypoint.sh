@@ -52,7 +52,7 @@ else:
 "
 
 # Start Python API on port 3030 (Railway's expected port)
-echo "🌐 Starting Python API with Fuseki proxy on port 3030..."
+echo "🌐 Starting Python API with Fuseki proxy on port 5000..."
 cd /app
 export INTERNAL_FUSEKI_PORT=3031
 python3 api_server.py
