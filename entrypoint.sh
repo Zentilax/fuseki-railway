@@ -18,7 +18,7 @@ java \
     -jar fuseki-server.jar \
     --port=3031 \
     --config=config.ttl \
-    --cors &
+    --withCORS &
 
 # Wait for Fuseki to start
 echo "⏳ Waiting for Fuseki to start..."
