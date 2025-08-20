@@ -84,33 +84,36 @@ def process_query():
         response = {
             "question": question,
             "from_cache": False,
-            "similar_query": None
+            "similar_query": None  # default: no similar query
         }
 
         # Prepare the prompt for SPARQL generation
         prompt_context = ontology_prompt
 
         if similar_query and not data.get('force_new_query', False):
-            # Add similar query and its SPARQL to the prompt context to help generate a refined query
+            # Add context to help refine
             prompt_context += (
                 "\n\n# Note: A similar question was asked previously.\n"
                 f"Similar question: {similar_query['question']}\n"
                 f"Similar SPARQL query: {similar_query['sparql_query']}\n"
                 "Please generate a SPARQL query that answers the current question distinctly."
             )
-            # Also include similar query info in the response as suggestion
+
+            # Include full info in response
             response['similar_query'] = {
                 "question": similar_query['question'],
                 "timestamp": similar_query['timestamp'],
                 "sparql_query": similar_query['sparql_query'],
-                "answer_preview": similar_query['formatted_answer'][:200]
-                "score": similar_query['score'] 
+                "answer_preview": similar_query['formatted_answer'][:200],
+                "score": similar_query['score']
             }
-        response['similar_query'] = {
-        "question": similar_query['question'],
-        "score": similar_query['score']
-        }
-        
+
+        elif similar_query:  # If below threshold but still want to return score + qn
+            response['similar_query'] = {
+                "question": similar_query['question'],
+                "score": similar_query['score']
+            }
+
         # Generate new query
         sparql_query = generate_sparql_query(question, prompt_context)
         
@@ -145,7 +148,6 @@ def process_query():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 @app.route('/history', methods=['GET'])
 @require_api_key
 def get_history():
