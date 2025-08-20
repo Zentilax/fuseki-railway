@@ -58,7 +58,51 @@ class QueryHistoryVectorDB:
         except Exception as e:
             print(f"⚠️ Error getting embedding: {e}")
             return None
-    
+    def generate_query_variations(question: str) -> List[str]:
+    #Generate paraphrases and variations of the query using LLM
+        try:
+            prompt = f"""
+    Given this question about food/dishes: "{question}"
+
+    Generate 3-5 alternative ways to ask the same question, focusing on:
+    1. Different ways to express ingredients (e.g., "contains", "has", "includes", "made with", "uses")
+    2. Different phrasings for dish types
+    3. Synonymous terms
+    4. if the original includes classes in ingredients. e.g Fruit as ingredient. there is no fruit class or desc in the ontology.
+
+    Return only the alternative questions, one per line, without numbering or explanations.
+
+    Examples:
+    Original: "german dish that has spinach as one of the ingredient"
+    Alternatives:
+    - german dish that contains spinach
+    - german dish made with spinach
+    - german dish that includes spinach
+    - german cuisine with spinach ingredient
+    - spinach-based german dish
+
+    Now generate alternatives for: "{question}"
+    """
+
+            response = client.chat.completions.create(
+                model="gpt-5-nano",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=200
+            )
+            
+            variations = response.choices[0].message.content.strip().split('\n')
+            # Clean up variations (remove dashes, empty lines, etc.)
+            variations = [v.strip().lstrip('- ').strip() for v in variations if v.strip() and not v.strip().startswith('-')]
+            variations = [v for v in variations if len(v) > 5]  # Filter out very short responses
+            
+            print(f"🔄 Generated {len(variations)} query variations")
+            return variations
+            
+        except Exception as e:
+            print(f"⚠️ Error generating query variations: {e}")
+            return []
+        
     def search_similar_queries(self, question):
         """Search for similar queries in history"""
         if self.index.ntotal == 0:
@@ -90,10 +134,45 @@ class QueryHistoryVectorDB:
         else:
             print(f"ℹ️ No similar queries found above threshold (best score: {best_score:.3f})")
             print(f"   Closest match was: {similar_query_data['question']}")
-            return {
+            
+            # Try paraphrases if original didn't meet threshold
+            print("🔄 Trying paraphrases to improve similarity search...")
+            variations = generate_query_variations(question)
+            
+            best_match = {
                 "question": similar_query_data['question'],
                 "score": float(best_score)
             }
+            
+            for i, variation in enumerate(variations):
+                print(f"🔍 Trying variation {i+1}/{len(variations)}: {variation}")
+                var_embedding = self.get_embedding(variation)
+                if var_embedding is None:
+                    continue
+                    
+                var_scores, var_indices = self.index.search(var_embedding.reshape(1, -1), 1)
+                var_best_score = var_scores[0][0]
+                var_best_idx = var_indices[0][0]
+                
+                if var_best_idx != -1:
+                    var_similar_data = self.metadata[var_best_idx]
+                    
+                    if var_best_score >= self.similarity_threshold:
+                        print(f"✅ Found match with paraphrase (similarity: {var_best_score:.3f})")
+                        return {
+                            **var_similar_data,
+                            "score": float(var_best_score)
+                        }
+                    
+                    # Keep track of best score
+                    if var_best_score > best_match["score"]:
+                        best_match = {
+                            "question": var_similar_data['question'],
+                            "score": float(var_best_score)
+                        }
+            
+            print("📭 No paraphrases found matches above threshold")
+            return best_match
     
     def add_query_to_history(self, question, sparql_query, results, formatted_answer):
         """Add a new query and its results to the history"""
