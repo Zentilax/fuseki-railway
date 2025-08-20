@@ -1,0 +1,73 @@
+@prefix fuseki: <http://jena.apache.org/fuseki#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
+@prefix ja:     <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix jetty:  <http://jena.apache.org/fuseki#jetty#> .
+
+
+# ==== RAW DATA SERVICE (for uploads/updates) ============================
+<#service_raw> rdf:type fuseki:Service ;
+    fuseki:name "german-food" ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:query ; 
+        fuseki:name "query" 
+    ] ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:update ; 
+        fuseki:name "update" 
+    ] ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:upload ; 
+        fuseki:name "upload" 
+    ] ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:gsp-rw ; 
+        fuseki:name "data" 
+    ] ;
+    fuseki:dataset <#dataset_raw> ;
+    jetty:filters (
+        [ rdf:type jetty:CorsFilter ;
+          jetty:allowedOrigins "*" ;
+          jetty:allowedMethods "GET, POST, OPTIONS, PUT, DELETE" ;
+          jetty:allowedHeaders "*" ;
+        ]
+    ) .
+
+# ==== INFERENCE SERVICE (read-only with reasoning) ===================
+<#service_inference> rdf:type fuseki:Service ;
+    fuseki:name "german-food-inferred" ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:query ; 
+        fuseki:name "query" 
+    ] ;
+    fuseki:endpoint [ 
+        fuseki:operation fuseki:gsp-r ; 
+        fuseki:name "data" 
+    ] ;
+    fuseki:dataset <#dataset_inference> ;
+    jetty:filters (
+        [ rdf:type jetty:CorsFilter ;
+          jetty:allowedOrigins "*" ;
+          jetty:allowedMethods "GET, POST, OPTIONS" ;
+          jetty:allowedHeaders "*" ;
+        ]
+    ) .
+
+# ==== RAW DATASET (TDB2) =============================================
+<#dataset_raw> rdf:type tdb2:DatasetTDB2 ;
+    tdb2:location "/data/german-food" .
+
+# ==== INFERENCE DATASET ==============================================
+<#dataset_inference> rdf:type ja:RDFDataset ;
+    ja:defaultGraph <#model_inference> .
+
+# ==== INFERENCE MODEL ================================================
+<#model_inference> rdf:type ja:InfModel ;
+    ja:baseModel <#model_raw> ;
+    ja:reasoner [
+        ja:reasonerURL <http://jena.hpl.hp.com/2003/OWLFBRuleReasoner>
+    ] .
+
+# ==== RAW MODEL (TDB2 Graph) =========================================
+<#model_raw> rdf:type tdb2:GraphTDB2 ;
+    tdb2:dataset <#dataset_raw> .
