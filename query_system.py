@@ -83,7 +83,10 @@ class QueryHistoryVectorDB:
         if best_score >= self.similarity_threshold:
             print(f"🎯 Found similar query (similarity: {best_score:.3f})")
             print(f"   Previous: {similar_query_data['question']}")
-            return similar_query_data
+            return {
+            **similar_query_data,   # unpack all original fields
+            "score": float(best_score)
+            }
         else:
             print(f"ℹ️ No similar queries found above threshold (best score: {best_score:.3f})")
             print(f"   Closest match was: {similar_query_data['question']}")

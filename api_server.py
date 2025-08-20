@@ -90,6 +90,11 @@ def process_query():
         # Prepare the prompt for SPARQL generation
         prompt_context = ontology_prompt
 
+        response['similar_query'] = {
+            "question": similar_query['question'],
+             "score": similar_query['score']
+            }
+
         if similar_query and not data.get('force_new_query', False):
             # Add context to help refine
             prompt_context += (
@@ -108,10 +113,7 @@ def process_query():
                 "score": similar_query['score']
             }
 
-        response['similar_query'] = {
-            "question": similar_query['question'],
-             "score": similar_query['score']
-            }
+        
 
         # Generate new query
         sparql_query = generate_sparql_query(question, prompt_context)
