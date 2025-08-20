@@ -90,15 +90,8 @@ def process_query():
         # Prepare the prompt for SPARQL generation
         prompt_context = ontology_prompt
 
-        response['similar_query'] = {
-            "question": similar_query.get('question', "N/A"),
-            "score": similar_query.get('score', "N/A"),
-            "sparql_query": None,
-            "timestamp" : None,
-            "sparql_query" : None
-        }
-
-        if similar_query and not data.get('force_new_query', False):
+        # Only add similar query context if we have a complete similar query (above threshold)
+        if similar_query and similar_query.get('sparql_query') and not data.get('force_new_query', False):
             # Add context to help refine
             prompt_context += (
                 "\n\n# Note: A similar question was asked previously.\n"
@@ -112,11 +105,18 @@ def process_query():
                 "question": similar_query.get('question', "N/A"),
                 "timestamp": similar_query.get('timestamp', "N/A"),
                 "sparql_query": similar_query.get('sparql_query', "N/A"),
-                "answer_preview": similar_query.get('formatted_answer', "N/A")[:200],
+                "answer_preview": similar_query.get('formatted_answer', "N/A")[:200] if similar_query.get('formatted_answer') else "N/A",
                 "score": similar_query.get('score', "N/A")
-                }
-
-        
+            }
+        elif similar_query:
+            # We found a similar query but it's below threshold - just include basic info
+            response['similar_query'] = {
+                "question": similar_query.get('question', "N/A"),
+                "score": similar_query.get('score', "N/A"),
+                "sparql_query": None,
+                "timestamp": None,
+                "answer_preview": None
+            }
 
         # Generate new query
         sparql_query = generate_sparql_query(question, prompt_context)
@@ -133,7 +133,7 @@ def process_query():
         if results:  # Rule 1: only add if query returned results
             similar_query = vector_db.search_similar_queries(question)
             
-            if not similar_query:  # Rule 2: no similar query already in DB
+            if not similar_query or not similar_query.get('sparql_query'):  # Rule 2: no similar query already in DB (above threshold)
                 vector_db.add_query_to_history(question, sparql_query, results, formatted_results)
                 print("💾 Query added to FAISS history")
             else:
