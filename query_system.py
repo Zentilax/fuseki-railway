@@ -6,9 +6,12 @@ import pickle
 import os
 import json
 from datetime import datetime
+from typing import List, Dict, Any, Optional, Tuple
 from config import OPENAI_API_KEY, FUSEKI_ENDPOINT, FAISS_SIMILARITY_THRESHOLD, FAISS_VOLUME_PATH
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
 
 class QueryHistoryVectorDB:
     def __init__(self, volume_path=FAISS_VOLUME_PATH, similarity_threshold=FAISS_SIMILARITY_THRESHOLD):
@@ -58,50 +61,7 @@ class QueryHistoryVectorDB:
         except Exception as e:
             print(f"⚠️ Error getting embedding: {e}")
             return None
-    def generate_query_variations(question: str) -> List[str]:
-    #Generate paraphrases and variations of the query using LLM
-        try:
-            prompt = f"""
-    Given this question about food/dishes: "{question}"
-
-    Generate 3-5 alternative ways to ask the same question, focusing on:
-    1. Different ways to express ingredients (e.g., "contains", "has", "includes", "made with", "uses")
-    2. Different phrasings for dish types
-    3. Synonymous terms
-    4. if the original includes classes in ingredients. e.g Fruit as ingredient. there is no fruit class or desc in the ontology.
-
-    Return only the alternative questions, one per line, without numbering or explanations.
-
-    Examples:
-    Original: "german dish that has spinach as one of the ingredient"
-    Alternatives:
-    - german dish that contains spinach
-    - german dish made with spinach
-    - german dish that includes spinach
-    - german cuisine with spinach ingredient
-    - spinach-based german dish
-
-    Now generate alternatives for: "{question}"
-    """
-
-            response = client.chat.completions.create(
-                model="gpt-5-nano",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=200
-            )
-            
-            variations = response.choices[0].message.content.strip().split('\n')
-            # Clean up variations (remove dashes, empty lines, etc.)
-            variations = [v.strip().lstrip('- ').strip() for v in variations if v.strip() and not v.strip().startswith('-')]
-            variations = [v for v in variations if len(v) > 5]  # Filter out very short responses
-            
-            print(f"🔄 Generated {len(variations)} query variations")
-            return variations
-            
-        except Exception as e:
-            print(f"⚠️ Error generating query variations: {e}")
-            return []
+    
         
     def search_similar_queries(self, question):
         """Search for similar queries in history"""
@@ -412,3 +372,48 @@ def format_results_with_llm(raw_results, original_question):
     except Exception as e:
         print(f"⚠️ Formatting failed, showing raw results: {e}")
         return raw_results
+
+def generate_query_variations(question: str) -> List[str]:
+    #Generate paraphrases and variations of the query using LLM
+        try:
+            prompt = f"""
+    Given this question about food/dishes: "{question}"
+
+    Generate 3-5 alternative ways to ask the same question, focusing on:
+    1. Different ways to express ingredients (e.g., "contains", "has", "includes", "made with", "uses")
+    2. Different phrasings for dish types
+    3. Synonymous terms
+    4. if the original includes classes in ingredients. e.g Fruit as ingredient. there is no fruit class or desc in the ontology.
+
+    Return only the alternative questions, one per line, without numbering or explanations.
+
+    Examples:
+    Original: "german dish that has spinach as one of the ingredient"
+    Alternatives:
+    - german dish that contains spinach
+    - german dish made with spinach
+    - german dish that includes spinach
+    - german cuisine with spinach ingredient
+    - spinach-based german dish
+
+    Now generate alternatives for: "{question}"
+    """
+
+            response = client.chat.completions.create(
+                model="gpt-5-nano",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=200
+            )
+            
+            variations = response.choices[0].message.content.strip().split('\n')
+            # Clean up variations (remove dashes, empty lines, etc.)
+            variations = [v.strip().lstrip('- ').strip() for v in variations if v.strip() and not v.strip().startswith('-')]
+            variations = [v for v in variations if len(v) > 5]  # Filter out very short responses
+            
+            print(f"🔄 Generated {len(variations)} query variations")
+            return variations
+            
+        except Exception as e:
+            print(f"⚠️ Error generating query variations: {e}")
+            return []
