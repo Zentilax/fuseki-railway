@@ -414,6 +414,7 @@ Focus on different ways to express the same concept:
 - Different phrasings for food/dish types
 - Synonymous terms
 - if the original query contains something like fruit, make it ingredients, because there is no fruit class
+- if the original query is not in english, try make paraphrases that are translated into english
 
 Return ONLY the alternative questions, one per line. Do not include numbers, bullets, or explanations.
 

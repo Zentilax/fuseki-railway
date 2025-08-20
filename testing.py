@@ -11,7 +11,7 @@ payload = {
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": ""  # <-- your secret API key
+    "x-api-key": "germanfoodchatbot"  # <-- your secret API key
 }
 
 response = requests.post(url, json=payload, headers=headers)
