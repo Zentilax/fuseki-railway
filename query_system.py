@@ -428,7 +428,7 @@ Now generate alternatives for: "{question}"
             model="gpt-5-nano",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=1000
+            max_completion_tokens=1000
         )
         
         content = response.choices[0].message.content.strip()
