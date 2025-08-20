@@ -65,13 +65,16 @@ class QueryHistoryVectorDB:
         
     def search_similar_queries(self, question):
         """Search for similar queries in history"""
+        search_log = []  # Track what happened during search
+        
         if self.index.ntotal == 0:
-            print("📭 No queries in history yet")
-            return None
+            search_log.append("No queries in history yet")
+            return {"search_log": search_log}
     
         embedding = self.get_embedding(question)
         if embedding is None:
-            return None
+            search_log.append("Failed to get embedding for question")
+            return {"search_log": search_log}
         
         # Search for most similar query
         scores, indices = self.index.search(embedding.reshape(1, -1), 1)
@@ -79,35 +82,40 @@ class QueryHistoryVectorDB:
         best_idx = indices[0][0]
         
         if best_idx == -1:
-            print("📭 No results in FAISS search")
-            return None
+            search_log.append("No results in FAISS search")
+            return {"search_log": search_log}
         
         similar_query_data = self.metadata[best_idx]
+        search_log.append(f"Original question similarity: {best_score:.3f}")
         
         if best_score >= self.similarity_threshold:
-            print(f"🎯 Found similar query (similarity: {best_score:.3f})")
-            print(f"   Previous: {similar_query_data['question']}")
+            search_log.append(f"Found match above threshold with original question")
+            search_log.append(f"Matched: {similar_query_data['question']}")
             return {
-            **similar_query_data,   # unpack all original fields
-            "score": float(best_score)
+                **similar_query_data,   # unpack all original fields
+                "score": float(best_score),
+                "search_log": search_log
             }
         else:
-            print(f"ℹ️ No similar queries found above threshold (best score: {best_score:.3f})")
-            print(f"   Closest match was: {similar_query_data['question']}")
+            search_log.append(f"Original question below threshold ({self.similarity_threshold})")
+            search_log.append(f"Closest match was: {similar_query_data['question']}")
             
             # Try paraphrases if original didn't meet threshold
-            print("🔄 Trying paraphrases to improve similarity search...")
+            search_log.append("Generating paraphrases to improve similarity search...")
             variations = generate_query_variations(question)
+            search_log.append(f"Generated {len(variations)} paraphrases: {variations}")
             
             best_match = {
                 "question": similar_query_data['question'],
-                "score": float(best_score)
+                "score": float(best_score),
+                "search_log": search_log
             }
             
             for i, variation in enumerate(variations):
-                print(f"🔍 Trying variation {i+1}/{len(variations)}: {variation}")
+                search_log.append(f"Trying paraphrase {i+1}: {variation}")
                 var_embedding = self.get_embedding(variation)
                 if var_embedding is None:
+                    search_log.append(f"  Failed to get embedding for paraphrase {i+1}")
                     continue
                     
                 var_scores, var_indices = self.index.search(var_embedding.reshape(1, -1), 1)
@@ -116,22 +124,30 @@ class QueryHistoryVectorDB:
                 
                 if var_best_idx != -1:
                     var_similar_data = self.metadata[var_best_idx]
+                    search_log.append(f"  Paraphrase {i+1} similarity: {var_best_score:.3f}")
                     
                     if var_best_score >= self.similarity_threshold:
-                        print(f"✅ Found match with paraphrase (similarity: {var_best_score:.3f})")
+                        search_log.append(f"  ✅ Found match with paraphrase {i+1}!")
+                        search_log.append(f"  Matched: {var_similar_data['question']}")
                         return {
                             **var_similar_data,
-                            "score": float(var_best_score)
+                            "score": float(var_best_score),
+                            "search_log": search_log,
+                            "matched_via_paraphrase": variation
                         }
                     
                     # Keep track of best score
                     if var_best_score > best_match["score"]:
                         best_match = {
                             "question": var_similar_data['question'],
-                            "score": float(var_best_score)
+                            "score": float(var_best_score),
+                            "search_log": search_log,
+                            "best_paraphrase": variation
                         }
+                else:
+                    search_log.append(f"  No results for paraphrase {i+1}")
             
-            print("📭 No paraphrases found matches above threshold")
+            search_log.append("No paraphrases found matches above threshold")
             return best_match
     
     def add_query_to_history(self, question, sparql_query, results, formatted_answer):

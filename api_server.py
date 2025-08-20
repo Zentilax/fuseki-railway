@@ -108,7 +108,8 @@ def process_query():
         response = {
             "question": question,
             "from_cache": False,
-            "similar_query": None
+            "similar_query": None,
+            "similarity_search_log": similar_query.get("search_log", []) if similar_query else []
         }
 
         # Add similar query info to response
@@ -118,7 +119,8 @@ def process_query():
                 "timestamp": similar_query.get('timestamp', "N/A"),
                 "sparql_query": similar_query.get('sparql_query', "N/A"),
                 "answer_preview": similar_query.get('formatted_answer', "N/A")[:200] if similar_query.get('formatted_answer') else "N/A",
-                "score": similar_query.get('score', "N/A")
+                "score": similar_query.get('score', "N/A"),
+                "matched_via_paraphrase": similar_query.get('matched_via_paraphrase')
             }
         elif similar_query:
             response['similar_query'] = {
@@ -126,7 +128,8 @@ def process_query():
                 "score": similar_query.get('score', "N/A"),
                 "sparql_query": None,
                 "timestamp": None,
-                "answer_preview": None
+                "answer_preview": None,
+                "best_paraphrase": similar_query.get('best_paraphrase')
             }
 
         # Check rules before adding to history
@@ -153,6 +156,7 @@ def process_query():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 @app.route('/history', methods=['GET'])
 @require_api_key
 def get_history():

@@ -6,12 +6,12 @@ url = "https://fuseki-railway-production.up.railway.app/query"
 
 # Human language question
 payload = {
-    "question": "german dish that has spinach as one of the ingredient"
+    "question": "a spinach containing dish"
 }
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": "germanfoodchatbot"  # <-- your secret API key
+    "x-api-key": ""  # <-- your secret API key
 }
 
 response = requests.post(url, json=payload, headers=headers)
