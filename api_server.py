@@ -91,9 +91,12 @@ def process_query():
         prompt_context = ontology_prompt
 
         response['similar_query'] = {
-            "question": similar_query['question'],
-             "score": similar_query['score']
-            }
+            "question": similar_query.get('question', "N/A"),
+            "score": similar_query.get('score', "N/A"),
+            "sparql_query": None,
+            "timestamp" : None,
+            "sparql_query" : None,
+        }
 
         if similar_query and not data.get('force_new_query', False):
             # Add context to help refine
@@ -106,12 +109,12 @@ def process_query():
 
             # Include full info in response
             response['similar_query'] = {
-                "question": similar_query['question'],
-                "timestamp": similar_query['timestamp'],
-                "sparql_query": similar_query['sparql_query'],
-                "answer_preview": similar_query['formatted_answer'][:200],
-                "score": similar_query['score']
-            }
+                "question": similar_query.get('question', "N/A"),
+                "timestamp": similar_query.get('timestamp', "N/A"),
+                "sparql_query": similar_query.get('sparql_query', "N/A"),
+                "answer_preview": similar_query.get('formatted_answer', "N/A")[:200]
+                "score": similar_query.get('score', "N/A")
+                }
 
         
 
