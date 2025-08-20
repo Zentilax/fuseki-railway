@@ -86,10 +86,14 @@ class QueryHistoryVectorDB:
             return {"search_log": search_log}
         
         similar_query_data = self.metadata[best_idx]
-        search_log.append(f"Original question similarity: {best_score:.3f}")
+        search_log.append(f"Original question similarity: {best_score:.3f} (threshold: {self.similarity_threshold})")
         
-        if best_score >= self.similarity_threshold:
-            search_log.append(f"Found match above threshold with original question")
+        # Debug the comparison
+        is_above_threshold = best_score >= self.similarity_threshold
+        search_log.append(f"Threshold check: {best_score:.3f} >= {self.similarity_threshold} = {is_above_threshold}")
+        
+        if is_above_threshold:
+            search_log.append(f"Found match above threshold ({self.similarity_threshold}) with original question")
             search_log.append(f"Matched: {similar_query_data['question']}")
             return {
                 **similar_query_data,   # unpack all original fields
@@ -102,7 +106,10 @@ class QueryHistoryVectorDB:
             
             # Try paraphrases if original didn't meet threshold
             search_log.append("Generating paraphrases to improve similarity search...")
-            variations = generate_query_variations(question)
+            variations, paraphrase_debug = generate_query_variations(question)
+            
+            # Add paraphrase generation details to search log
+            search_log.extend(paraphrase_debug)
             search_log.append(f"Generated {len(variations)} paraphrases: {variations}")
             
             best_match = {
@@ -389,47 +396,77 @@ def format_results_with_llm(raw_results, original_question):
         print(f"⚠️ Formatting failed, showing raw results: {e}")
         return raw_results
 
-def generate_query_variations(question: str) -> List[str]:
-    #Generate paraphrases and variations of the query using LLM
-        try:
-            prompt = f"""
-    Given this question about food/dishes: "{question}"
-
-    Generate 3-5 alternative ways to ask the same question, focusing on:
-    1. Different ways to express ingredients (e.g., "contains", "has", "includes", "made with", "uses")
-    2. Different phrasings for dish types
-    3. Synonymous terms
-    4. if the original includes classes in ingredients. e.g Fruit as ingredient. there is no fruit class or desc in the ontology.
-
-    Return only the alternative questions, one per line, without numbering or explanations.
-
-    Examples:
-    Original: "german dish that has spinach as one of the ingredient"
-    Alternatives:
-    - german dish that contains spinach
-    - german dish made with spinach
-    - german dish that includes spinach
-    - german cuisine with spinach ingredient
-    - spinach-based german dish
-
-    Now generate alternatives for: "{question}"
+def generate_query_variations(question: str) -> tuple[List[str], List[str]]:
+    """Generate paraphrases and variations of the query using LLM
+    
+    Returns:
+        (variations_list, debug_log)
     """
+    debug_log = []
+    
+    try:
+        prompt = f"""Generate 3-5 alternative ways to ask this question: "{question}"
 
-            response = client.chat.completions.create(
-                model="gpt-5-nano",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=200
-            )
+Focus on different ways to express the same concept:
+- Different words for ingredients (contains, has, includes, made with, uses)
+- Different phrasings for food/dish types
+- Synonymous terms
+- if the original query contains something like fruit, make it ingredients, because there is no fruit class
+
+Return ONLY the alternative questions, one per line. Do not include numbers, bullets, or explanations.
+
+Example for "german dish that has spinach as ingredient":
+german dish that contains spinach
+german dish made with spinach  
+german cuisine with spinach ingredient
+spinach-based german dish
+
+Now generate alternatives for: "{question}"
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-5-nano",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1000
+        )
+        
+        content = response.choices[0].message.content.strip()
+        debug_log.append(f"Raw LLM response: {repr(content)}")
+        
+        if not content:
+            debug_log.append("Empty response from LLM")
+            return [], debug_log
             
-            variations = response.choices[0].message.content.strip().split('\n')
-            # Clean up variations (remove dashes, empty lines, etc.)
-            variations = [v.strip().lstrip('- ').strip() for v in variations if v.strip() and not v.strip().startswith('-')]
-            variations = [v for v in variations if len(v) > 5]  # Filter out very short responses
+        # Split by newlines and clean up
+        lines = content.split('\n')
+        variations = []
+        
+        for line in lines:
+            # Clean up each line
+            cleaned = line.strip()
+            # Remove common prefixes (bullets, numbers, dashes)
+            cleaned = cleaned.lstrip('- •*123456789.() ')
+            # Remove quotes if present
+            cleaned = cleaned.strip('"\'')
             
-            print(f"🔄 Generated {len(variations)} query variations")
-            return variations
-            
-        except Exception as e:
-            print(f"⚠️ Error generating query variations: {e}")
-            return []
+            # Only keep substantial variations (not too short, not empty)
+            if len(cleaned) > 10 and cleaned.lower() != question.lower():
+                variations.append(cleaned)
+        
+        debug_log.append(f"Processed {len(variations)} valid paraphrases from {len(lines)} lines")
+        return variations, debug_log
+        
+    except Exception as e:
+        debug_log.append(f"Error generating query variations: {e}")
+        # Return some basic fallbacks for common cases
+        fallbacks = []
+        if "has" in question and "ingredient" in question:
+            fallbacks.append(question.replace("has", "contains").replace("as one of the ingredient", ""))
+            fallbacks.append(question.replace("has", "includes").replace("as one of the ingredient", ""))
+        elif "dish" in question:
+            fallbacks.append(question.replace("dish", "food"))
+            fallbacks.append(question.replace("dish", "cuisine"))
+        
+        debug_log.append(f"Using {len(fallbacks)} fallback paraphrases due to error")
+        return fallbacks, debug_log

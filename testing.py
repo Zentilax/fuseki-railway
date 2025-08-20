@@ -6,7 +6,7 @@ url = "https://fuseki-railway-production.up.railway.app/query"
 
 # Human language question
 payload = {
-    "question": "a spinach containing dish"
+    "question": "a desert with fruits"
 }
 
 headers = {
@@ -24,6 +24,7 @@ data = json.loads(response.text)
 # Print neatly
 print("Answer:\n", data.get("answer", "No answer found"), "\n")
 print("SPARQL Query:\n", data.get("sparql_query", "No SPARQL query found"), "\n")
+print(data["similarity_search_log"])
 if "similar_query" in data and data["similar_query"]:
     print("Similar Query Info:")
     sim = data["similar_query"]
