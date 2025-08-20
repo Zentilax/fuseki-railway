@@ -302,6 +302,8 @@ def load_ontology_prompt():
             9 Object property always stars with 'has' the h is lowercase
             10. **CRITICAL** When looking up instances/dish names, Use CONTAINS in ?Dish
             11. **CRITICAL** Always Limit result by 10 rows
+            12. Always use english names, whatever the user query languange is
+            13. if he as for a certain class of ingredients e.g fruit, there are no fruit class. so just try apple,strawberry etc as instances
 
 
             EXAMPLE QUERY
@@ -427,7 +429,6 @@ Now generate alternatives for: "{question}"
         response = client.chat.completions.create(
             model="gpt-5-nano",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
             max_completion_tokens=1000
         )
         
