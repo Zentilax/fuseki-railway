@@ -108,10 +108,9 @@ def process_query():
                 "score": similar_query['score']
             }
 
-        elif similar_query:  # If below threshold but still want to return score + qn
-            response['similar_query'] = {
-                "question": similar_query['question'],
-                "score": similar_query['score']
+        response['similar_query'] = {
+            "question": similar_query['question'],
+             "score": similar_query['score']
             }
 
         # Generate new query
