@@ -87,7 +87,10 @@ class QueryHistoryVectorDB:
         else:
             print(f"ℹ️ No similar queries found above threshold (best score: {best_score:.3f})")
             print(f"   Closest match was: {similar_query_data['question']}")
-            return None
+            return {
+                "question": similar_query_data['question'],
+                "score": float(best_score)
+            }
     
     def add_query_to_history(self, question, sparql_query, results, formatted_answer):
         """Add a new query and its results to the history"""

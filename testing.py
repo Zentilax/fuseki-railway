@@ -11,7 +11,7 @@ payload = {
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": ""  # <-- your secret API key
+    "x-api-key": "germanfoodchatbot"  # <-- your secret API key
 }
 
 response = requests.post(url, json=payload, headers=headers)
@@ -27,7 +27,13 @@ print("SPARQL Query:\n", data.get("sparql_query", "No SPARQL query found"), "\n"
 if "similar_query" in data and data["similar_query"]:
     print("Similar Query Info:")
     sim = data["similar_query"]
+    print("with the score of: ",sim.get("score"))
     print(" Question:", sim.get("question"))
     print(" Answer preview:", sim.get("answer_preview"))
     print(" SPARQL:", sim.get("sparql_query"))
     print(" Timestamp:", sim.get("timestamp"))
+else:
+    print("No Similar Queries found")
+    sim = data["similar_query"]
+    print("the most similar question was: ",sim.get("question"))
+    print("with the score of: ",sim.get("score"))

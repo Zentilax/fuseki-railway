@@ -103,8 +103,13 @@ def process_query():
                 "question": similar_query['question'],
                 "timestamp": similar_query['timestamp'],
                 "sparql_query": similar_query['sparql_query'],
-                "answer_preview": similar_query['formatted_answer'][:200]  # partial preview
+                "answer_preview": similar_query['formatted_answer'][:200]
+                "score": similar_query['score'] 
             }
+        response['similar_query'] = {
+        "question": similar_query['question'],
+        "score": similar_query['score']
+        }
         
         # Generate new query
         sparql_query = generate_sparql_query(question, prompt_context)
