@@ -110,7 +110,7 @@ def process_query():
         # Check for similar queries (now with automatic paraphrasing if needed)
         similar_query = vector_db.search_similar_queries(question)
         
-        if similar_query and similar_query.get('sparql_query'):
+        #if similar_query and similar_query.get('sparql_query'):
             #logger.info(f"🔍 Similar query found for '{question}': '{similar_query.get('question', 'N/A')}' (score: {similar_query.get('score', 'N/A')})")
 
         # Prepare the prompt for SPARQL generation
