@@ -304,6 +304,7 @@ def load_ontology_prompt():
             11. **CRITICAL** Always Limit result by 10 rows
             12. Always use english names, whatever the user query languange is
             13. if he as for a certain class of ingredients e.g fruit, there are no fruit class. so just try apple,strawberry etc as instances
+            14. **IMPORTANT** dont use contains in ?dish for ingredients or meatcuts inside the dish. use object properties
 
 
             EXAMPLE QUERY
@@ -407,7 +408,7 @@ def generate_query_variations(question: str) -> tuple[List[str], List[str]]:
     debug_log = []
     
     try:
-        prompt = f"""Generate 3-5 alternative ways to ask this question: "{question}"
+        prompt = f"""Generate 3 alternative ways to ask this question: "{question}"
 
 Focus on different ways to express the same concept:
 - Different words for ingredients (contains, has, includes, made with, uses)

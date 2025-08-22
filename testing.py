@@ -1,30 +1,44 @@
 import requests
 import json
 
-# Replace with your Railway API base URL
 url = "https://fuseki-railway-production.up.railway.app/query"
 
 # Human language question
 payload = {
-    "question": "saya mau makanan yang mengandung kangkung"
+    "question": "a  dish with chikcken" #<--- CHANGE THIS PART ONLY
 }
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": "germanfoodchatbot"  # <-- your secret API key
+    "x-api-key": "" 
 }
 
 response = requests.post(url, json=payload, headers=headers)
 
 print(response.status_code)
-print(response.text)
+#print(response.text)
 
 data = json.loads(response.text)
 
-# Print neatly
+
+print("#########################################")
+print("RESULTS")
+print("#########################################")
 print("Answer:\n", data.get("answer", "No answer found"), "\n")
+print("\n","#########################################")
+print("SPARQL RESULT")
+print("#########################################","\n")
 print("SPARQL Query:\n", data.get("sparql_query", "No SPARQL query found"), "\n")
-print(data["similarity_search_log"])
+
+print("\n","#########################################")
+print("CHECK PARAPHRASING")
+print("#########################################", "\n")
+for i, line in enumerate(data["similarity_search_log"], 1):
+    print(f"{i:02d}. {line}")
+
+print("\n","#########################################")
+print("SIMILAR QUERY INFO")
+print("#########################################", "\n")
 if "similar_query" in data and data["similar_query"]:
     print("Similar Query Info:")
     sim = data["similar_query"]
