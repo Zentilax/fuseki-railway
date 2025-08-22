@@ -5,12 +5,12 @@ url = "https://fuseki-railway-production.up.railway.app/query"
 
 # Human language question
 payload = {
-    "question": "i want to eat a traditional german cake" #<--- CHANGE THIS PART ONLY
+    "question": "" #<--- CHANGE THIS PART ONLY
 }
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": "" 
+    "x-api-key": "bigdatalabfoodkg" 
 }
 
 response = requests.post(url, json=payload, headers=headers)
