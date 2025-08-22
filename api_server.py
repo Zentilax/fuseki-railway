@@ -21,7 +21,7 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)  # Also log to console
     ]
 )
-logger = logging.getLogger(__name__
+logger = logging.getLogger(__name__)
 
 def require_api_key(f):
     @wraps(f)
