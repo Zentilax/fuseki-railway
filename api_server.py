@@ -12,7 +12,15 @@ from config import FAISS_VOLUME_PATH, API_HOST, API_PORT, INTERNAL_FUSEKI_PORT
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('/data/query_logs.log'),  # Log to file
+        logging.StreamHandler(sys.stdout)  # Also log to console
+    ]
+)
+logger = logging.getLogger(__name__
 
 def require_api_key(f):
     @wraps(f)
@@ -77,7 +85,7 @@ def process_query():
 
         if not question:
             return jsonify({"error": "Question is required"}), 400
-
+        logger.info(f"📝 NEW QUERY from {client_ip}: '{question}' (force_new: {force_new_query})")
         # Check for similar queries (now with automatic paraphrasing if needed)
         similar_query = vector_db.search_similar_queries(question)
 
@@ -139,11 +147,11 @@ def process_query():
             
             if not existing_similar or not existing_similar.get('sparql_query'):
                 vector_db.add_query_to_history(question, sparql_query, results, formatted_results)
-                print("💾 Query added to FAISS history")
+                logger.info(f"💾 Query '{question}' added to FAISS history")
             else:
                 print("⚠️ Similar query already exists, not adding to history")
         else:
-            print("⚠️ Query returned no results, not adding to history")
+            logger.warning(f"⚠️ Query '{question}' returned no results, not adding to history")
 
         # Update response with results
         response.update({
