@@ -10,7 +10,7 @@ payload = {
 
 headers = {
     "Content-Type": "application/json",
-    "x-api-key": "bigdatalabfoodkg" 
+    "x-api-key": "" 
 }
 
 response = requests.post(url, json=payload, headers=headers)
