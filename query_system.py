@@ -304,8 +304,8 @@ def load_ontology_prompt():
             11. **CRITICAL** Always Limit result by 10 rows
             12. Always use english names, whatever the user query languange is
             13. if he as for a certain class of ingredients e.g fruit, there are no fruit class. so just try apple,strawberry etc as instances
-            14. **IMPORTANT** dont use contains in ?dish for ingredients or meatcuts inside the dish. use object properties
-
+            14. **IMPORTANT** use OPTIONAL when contains in ?dish for name search e.g contains("cake"). but use object property first if possible
+            15. if a user queries cake, or cupcake or something similar, use dessert, and optionally search for cake in the desc or name
 
             EXAMPLE QUERY
             ## To find Beverages with > 5 alcohol content ##
@@ -334,6 +334,7 @@ def load_formatting_prompt():
                 - Group or organize information logically if appropriate
                 - Keep it concise but informative
                 - Use emojis sparingly and appropriately if they enhance readability
+                - Dont make it conversational because you are a QA system.
 
                 Present the information as if you're a knowledgeable guide helping someone discover German cuisine.
                 do not add information outside of the context and knowledge you have been given
