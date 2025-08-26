@@ -251,7 +251,6 @@ def load_ontology_prompt():
             - DietType: Halal,Kosher,Omnivore, Vegetarian, Vegan.
 
             Object Properties:
-            - hasBeverageType (Alcoholic, NonAlcoholic)
             - hasDietType (dish -> DietType)
             - hasFlavorProfile (dish -> FlavorProfile)
             - hasIngredient (dish -> Ingredient)
@@ -307,6 +306,7 @@ def load_ontology_prompt():
             14. **IMPORTANT** use OPTIONAL when contains in ?dish for name search e.g contains("cake"). but use object property first if possible
             15. if a user queries cake, or cupcake or something similar, use dessert, and optionally search for cake in the desc or name
             16. **IMPORTANT**: Never search for ingredients or meat cuts using CONTAINS on ?Dish.
+            17. For beverage, if alcoholic or non, use rdf:type
 
             EXAMPLE QUERY
             ## To find Beverages with > 5 alcohol content ##
