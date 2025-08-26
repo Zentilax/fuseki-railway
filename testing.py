@@ -5,7 +5,7 @@ url = "https://fuseki-railway-production.up.railway.app/query"
 
 # Human language question
 payload = {
-    "question": "i want to eat halal breakfast" #<--- CHANGE THIS PART ONLY
+    "question": "Find all vegetarian main courses from Bavaria that do not contain spinach" #<--- CHANGE THIS PART ONLY
 }
 
 headers = {

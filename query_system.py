@@ -299,13 +299,14 @@ def load_ontology_prompt():
             6. Always return the hasDescription or description of the selected items
             7. for every instance or class name, it always starts with a capital letter
             8. instances, classes and any other variables are with Camelcases, where the first letter is always Capital
-            9 Object property always stars with 'has' the h is lowercase
-            10. **CRITICAL** When looking up instances/dish names, Use CONTAINS in ?Dish
+            9. Object property always stars with 'has' the h is lowercase
+            10. **CRITICAL** When looking up instances/dish names, Use CONTAINS in ?Dish (only for instances/dish names) 
             11. **CRITICAL** Always Limit result by 10 rows
             12. Always use english names, whatever the user query languange is
             13. if he as for a certain class of ingredients e.g fruit, there are no fruit class. so just try apple,strawberry etc as instances
             14. **IMPORTANT** use OPTIONAL when contains in ?dish for name search e.g contains("cake"). but use object property first if possible
             15. if a user queries cake, or cupcake or something similar, use dessert, and optionally search for cake in the desc or name
+            16. **IMPORTANT**: Never search for ingredients or meat cuts using CONTAINS on ?Dish.
 
             EXAMPLE QUERY
             ## To find Beverages with > 5 alcohol content ##
