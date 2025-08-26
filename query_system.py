@@ -295,7 +295,7 @@ def load_ontology_prompt():
                 Always match using patterns that allow entities with multiple values to be included if any value matches the user request.
                 Example:
                 "vegetarian dishes" → returns dishes that are gc:vegetarian even if they are also gc:omnivore.
-            6. Always return the hasDescription or description of the selected items
+            6. Always return the hasDescription or description of the selected items but use OPTIONAL
             7. for every instance or class name, it always starts with a capital letter
             8. instances, classes and any other variables are with Camelcases, where the first letter is always Capital
             9. Object property always stars with 'has' the h is lowercase
@@ -412,23 +412,23 @@ def generate_query_variations(question: str) -> tuple[List[str], List[str]]:
     try:
         prompt = f"""Generate 3 alternative ways to ask this question: "{question}"
 
-Focus on different ways to express the same concept:
-- Different words for ingredients (contains, has, includes, made with, uses)
-- Different phrasings for food/dish types
-- Synonymous terms
-- if the original query contains something like fruit, make it ingredients, because there is no fruit class
-- if the original query is not in english, try make paraphrases that are translated into english
+        Focus on different ways to express the same concept:
+        - Different words for ingredients (contains, has, includes, made with, uses)
+        - Different phrasings for food/dish types
+        - Synonymous terms
+        - if the original query contains something like fruit, make it ingredients, because there is no fruit class
+        - if the original query is not in english, try make paraphrases that are translated into english
 
-Return ONLY the alternative questions, one per line. Do not include numbers, bullets, or explanations.
+        Return ONLY the alternative questions, one per line. Do not include numbers, bullets, or explanations.
 
-Example for "german dish that has spinach as ingredient":
-german dish that contains spinach
-german dish made with spinach  
-german cuisine with spinach ingredient
-spinach-based german dish
+        Example for "german dish that has spinach as ingredient":
+        german dish that contains spinach
+        german dish made with spinach  
+        german cuisine with spinach ingredient
+        spinach-based german dish
 
-Now generate alternatives for: "{question}"
-"""
+        Now generate alternatives for: "{question}"
+        """
 
         response = client.chat.completions.create(
             model="gpt-5-nano",
