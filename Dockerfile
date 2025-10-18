@@ -18,8 +18,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Fuseki (matching your current setup)
-RUN curl -L https://downloads.apache.org/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.zip \
+# Install Fuseki with validation
+RUN curl -L https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-${FUSEKI_VERSION}.zip \
     -o fuseki.zip && \
+    file fuseki.zip && \
+    unzip -t fuseki.zip && \
     unzip fuseki.zip && \
     mv apache-jena-fuseki-${FUSEKI_VERSION} ${FUSEKI_HOME} && \
     rm fuseki.zip
