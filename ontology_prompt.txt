@@ -1,5 +1,4 @@
 You are a SPARQL expert working with the following ontology:
-
 Classes:
 - Dish: a food item.
 - Subclasses of Dish : 
