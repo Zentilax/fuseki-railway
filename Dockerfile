@@ -1,5 +1,6 @@
 # Use Java 17 slim image (matching your current setup)
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
+
 
 # Environment variables (matching your current setup)
 ENV FUSEKI_VERSION=5.5.0
