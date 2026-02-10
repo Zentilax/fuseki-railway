@@ -19,7 +19,7 @@ class QueryHistoryVectorDB:
         self.similarity_threshold = similarity_threshold
         self.index_file = os.path.join(volume_path, "query_history.faiss")
         self.metadata_file = os.path.join(volume_path, "query_metadata.pkl")
-        self.dimension = 1536  # OpenAI text-embedding-3-small dimension
+        self.dimension = 1536  # OpenAI text-embedding-3-small dimensions
         
         # Ensure volume directory exists
         os.makedirs(volume_path, exist_ok=True)
@@ -176,7 +176,7 @@ class QueryHistoryVectorDB:
         }
         self.metadata.append(query_data)
         
-        # Save to volume
+        # Save to volumes
         self.save_index()
         print(f"💾 Query saved to history (total: {len(self.metadata)})")
     
