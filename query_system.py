@@ -166,7 +166,7 @@ class QueryHistoryVectorDB:
         # Add to index
         self.index.add(embedding.reshape(1, -1))
         
-        # Add metadata
+        # Add metadataa
         query_data = {
             'question': question,
             'sparql_query': sparql_query,
